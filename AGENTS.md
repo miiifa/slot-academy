@@ -6,3 +6,7 @@
 - 著作権が不明な画像を再配布しない。出典・利用許可を記録する。
 - `draft/index.html` は動作未完了。必要ファイルと操作テストを揃えるまで公開用入口と取り違えない。
 - ブランチ→PR→テスト→レビューを経て、承認前に勝手にmainへマージしない。
+- 共通原本は、この配置では `../project-starter/AGENTS.md`。新規企画・大規模改修時は `../project-starter/PROJECT_PLAYBOOK.md` を読む。
+- ローカル起動は `npm run serve`、検証は `npm test` と `npm run test:browser`。既存ブラウザーは `CHROMIUM_PATH` で指定可能。
+- `app/machines.js` の `model` は教材用。実機の未確認値を `facts` に確定値として入れない。`sources.checked: null` は未照合。
+- 静的配信は `node scripts/build.mjs` の `_site/` のみ。PRの検証とmainのPages配信を分離する。

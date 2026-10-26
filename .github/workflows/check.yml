@@ -1,0 +1,37 @@
+name: Validate Slot Academy
+on:
+  pull_request:
+  push:
+    branches: [wip/slot-academy-handoff-20261026]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/build.mjs
+      - name: Serve as a GitHub Pages project site and check the browser
+        run: |
+          mkdir -p /tmp/slot-pages/slot-academy
+          cp -R _site/. /tmp/slot-pages/slot-academy/
+          python3 -m http.server 8000 --bind 127.0.0.1 --directory /tmp/slot-pages > /tmp/slot-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent http://127.0.0.1:8000/slot-academy/ > /dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:8000/slot-academy/ npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-screenshots
+          path: test-results/
