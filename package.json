@@ -1,0 +1,11 @@
+{
+  "name": "slot-academy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/engine.test.js tests/site.test.js",
+    "serve": "python3 -m http.server 8000 --bind 127.0.0.1",
+    "test:browser": "node tests/browser.cjs"
+  },
+  "devDependencies": { "playwright": "1.56.1" }
+}
