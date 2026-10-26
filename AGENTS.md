@@ -4,7 +4,7 @@
 - 共通基礎編の後に機種別編を配置。小役・CZ・AT・引き戻し・終了判断まで説明する。
 - Androidスマホ画面の操作性とフロー図の現在地更新を重視する。
 - 著作権が不明な画像を再配布しない。出典・利用許可を記録する。
-- `draft/index.html` は動作未完了。必要ファイルと操作テストを揃えるまで公開用入口と取り違えない。
+- `draft/index.html` は旧草案から現在の入口への案内。現在のアプリ入口はルートの `index.html`。
 - ブランチ→PR→テスト→レビューを経て、承認前に勝手にmainへマージしない。
 - 共通原本は、この配置では `../project-starter/AGENTS.md`。新規企画・大規模改修時は `../project-starter/PROJECT_PLAYBOOK.md` を読む。
 - ローカル起動は `npm run serve`、検証は `npm test` と `npm run test:browser`。既存ブラウザーは `CHROMIUM_PATH` で指定可能。

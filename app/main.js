@@ -1,38 +1,511 @@
-import {machines,sources} from './machines.js';
-import {Simulator} from './engine.js';
-import {chapters} from './textbook.js';
-import {dictionary} from './glossary.js';
-const $=id=>document.getElementById(id);
-const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
-const link=(text,href)=>{const a=el('a',text);a.href=href;return a;};
-const sim=new Simulator();let chapter=chapters[0];let quizIndex=0,quizScore=0,answered=false;
-const ids=['learn','sim','machine','words','quiz','resources'];
-function route(){const [view,chapterId]=location.hash.slice(1).split('/');const active=ids.includes(view)?view:'learn';if(active==='learn'&&chapterId){chapter=chapters.find(c=>c.id===chapterId)||chapters[0];renderChapter();}document.querySelectorAll('main>.view').forEach(n=>{n.classList.toggle('active',n.id==='view-'+active);n.hidden=n.id!=='view-'+active;});document.querySelectorAll('[data-view]').forEach(a=>{a.classList.toggle('active',a.dataset.view===active);if(a.dataset.view===active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});}
-function chapterHref(id){return '#learn/'+id;}
-function chapterArticle(c){const article=el('article');article.append(el('p',c.part+'編','eyebrow'),el('h2',c.title),el('p','学習目標：'+c.goal,'notice'),el('h3','重要用語'));
- const terms=el('p');c.terms.split('・').forEach((t,i)=>{if(i)terms.append(' ／ ');const a=link(t,'#words');a.onclick=()=>{$('termSearch').value=t;renderGlossary(t);};terms.append(a);});article.append(terms,el('h3','仕組みと理由'),el('p',c.body),el('h3','図で確認'));
- const diagram=el('div',undefined,'diagram');diagram.setAttribute('aria-label','学習フロー');c.flow.forEach(step=>diagram.append(el('span',step)));article.append(diagram,el('h3','具体例・操作で試す'),el('p',c.example));const details=el('details');details.append(el('summary','復習：'+c.q),el('p',c.a));article.append(details);return article;}
-function renderChapter(){const target=$('chapterContent');target.replaceChildren(chapterArticle(chapter));$('chapterSelect').value=chapter.id;document.querySelectorAll('#chapterNav a').forEach(a=>{if(a.hash===chapterHref(chapter.id))a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');});const nav=el('div',undefined,'chapter-controls');const i=chapters.indexOf(chapter);if(i>0)nav.append(link('← 前の章',chapterHref(chapters[i-1].id)));nav.append(link('デモで試す','#sim'));if(i<chapters.length-1)nav.append(link('次の章 →',chapterHref(chapters[i+1].id)));else nav.append(link('理解度を確認 →','#quiz'));target.append(nav);}
-for(const c of chapters){const option=el('option',c.part+'｜'+c.title);option.value=c.id;$('chapterSelect').append(option);$('chapterNav').append(link(c.title,chapterHref(c.id)));}
-$('chapterSelect').onchange=e=>{location.hash=chapterHref(e.target.value);};
-for(const id of ['simMachine','machineSelect']){for(const m of Object.values(machines)){const option=el('option',m.name);option.value=m.id;$(id).append(option);}$(id).onchange=e=>{sim.reset(e.target.value);$('forceRole').value='';$('outcome').value='random';$('aim').checked=true;render();renderMachine();};}
-function render(){const s=sim.s,m=sim.machine;for(const id of ['simMachine','machineSelect'])$(id).value=m.id;$('simMachineName').textContent=m.name;$('phaseBadge').textContent=sim.node.name;$('phaseName').textContent=sim.node.name;$('phaseGoal').textContent=sim.node.goal;$('credit').textContent=s.credit;$('totalG').textContent=s.total+'G';$('phaseG').textContent=s.g+'G';$('roleNote').textContent='成立役：'+(s.role||'未抽選')+(s.cycle==='spin'?'（レバーで決定済み）':'');$('message').textContent=s.message;$('paid').textContent='今回の払い出し：'+s.paid+'枚／次Gの追加投入：'+(s.replay?'不要':'3枚');$('modelNote').textContent=m.factNote;
- $('betBtn').disabled=s.cycle!=='ready';$('leverBtn').disabled=s.cycle!=='bet';$('forceRole').disabled=s.cycle==='spin';$('outcome').disabled=s.cycle==='spin';$('aim').disabled=s.cycle==='spin'&&s.stopped[1];
- [0,1,2].forEach(i=>{const stopped=s.cycle!=='spin'||s.stopped[i];$('stop'+i).disabled=s.cycle!=='spin'||s.stopped[i];const r=$('reel'+i);r.classList.toggle('spinning',!stopped);r.replaceChildren();['BAR',stopped?(s.role||'—'):'回転中','7'].forEach(text=>r.append(el('span',text,'symbol')));if(stopped&&s.role==='スイカ'&&!s.aim)r.children[1].textContent='外れた停止形';});
- $('mobileWhere').textContent=sim.node.name+'｜'+s.g+'G消化・残り'+s.remaining+'G';$('whereCount').textContent=sim.node.name+'｜消化'+s.g+'G／残り'+s.remaining+'G（教材）';$('progress').style.width=Math.min(100,s.g/(s.g+s.remaining)*100)+'%';$('flowNodes').replaceChildren();Object.entries(m.nodes).forEach(([key,node])=>{const b=el('button',node.name,key===s.phase?'current':'');b.type='button';b.dataset.phase=key;if(key===s.phase)b.setAttribute('aria-current','step');b.onclick=()=>{sim.jump(key);render();};$('flowNodes').append(b);});
- $('edges').replaceChildren();m.edges.forEach(([from,to,condition])=>{$('edges').append(el('li',m.nodes[from].name+' → '+m.nodes[to].name+'：'+condition,from===s.phase?'active-edge':''));});
- $('whereWhy').textContent=s.history[0]?.reason||'開始：通常時で基本操作から練習します。';$('relatedChapter').href=chapterHref(sim.node.chapter);$('eventLog').replaceChildren();s.history.forEach(h=>$('eventLog').append(el('li',h.total+'G：'+m.nodes[h.from].name+' → '+m.nodes[h.to].name+'。'+h.reason)));$('lastEnd').textContent=s.lastEnd?'直前の教材終了情報：総'+s.lastEnd.total+'G／'+s.lastEnd.credit+'枚。復帰後もこの記録を保持。':'AT終了情報：まだなし。';}
-$('showFlow').onclick=()=>document.querySelector('.live-flow').scrollIntoView({block:'start'});
-$('betBtn').onclick=()=>{sim.bet();render();};$('leverBtn').onclick=()=>{if($('forceRole').value)sim.force($('forceRole').value);sim.lever();$('forceRole').value='';render();};[0,1,2].forEach(i=>$('stop'+i).onclick=()=>{sim.stop(i,$('aim').checked);render();});$('aim').onchange=()=>{sim.s.aim=$('aim').checked;};$('outcome').onchange=e=>{sim.s.outcome=e.target.value;};$('resetBtn').onclick=()=>{sim.reset();$('outcome').value='random';$('forceRole').value='';$('aim').checked=true;render();};
-function sourceCards(target,list){target.replaceChildren();list.forEach(s=>{const card=el('div');card.append(link(s.name,s.url),el('p','本文確認日：'+(s.checked||'未確認')+'／取得試行日：'+s.attempted+'／'+s.status,'small'));target.append(card);});}
-function renderMachine(){const m=sim.machine,target=$('machineContent');target.replaceChildren(el('h3',m.name),el('p',m.description),el('p',m.factNote,'notice'));const sketch=el('div',undefined,'schematic');sketch.setAttribute('role','img');sketch.setAttribute('aria-label','独自作成の筐体模式図。実機写真ではありません');sketch.append(el('b',m.fictional?'架空教材機':'SAO2 題材'),el('span','▥　▥　▥'),el('small','独自の模式図／実機画像ではありません'));target.append(sketch);const table=el('table',undefined,'table');m.facts.forEach(([k,v])=>{const tr=el('tr');const th=el('th',k);th.scope='row';tr.append(th,el('td',v));table.append(tr);});target.append(table,el('h3','教材用の設定（実機値ではありません）'));
- const values=el('p');values.textContent='投入'+m.model.bet+'枚／ベル'+m.model.bell+'枚／スイカ'+m.model.watermelon+'枚。'+(m.fictional?'通常6G・ボーナス4G。':'通常8G・CZ5G・AT8G・ラストアタック5G・上位CZ3G・上位AT8G・終了後50G。CZ成功55%、上位CZ50%、ラストアタック30%、終了後毎G1.2%。AT中チェリーで＋2G（最大2回）と上位CZ権利。');target.append(values,link('選択した機種を操作する →','#sim'),el('h3','教材と関連資料'));target.append(link('機種別の教科書',chapterHref(m.fictional?'b-aim':'s-spec')));if(m.sources.length){const holder=el('div');sourceCards(holder,sources.filter(s=>m.sources.includes(s.id)));target.append(holder);}else target.append(el('p','実在機種・メーカーとの関係はありません。実機情報の出典はありません。'));target.append(el('p','筐体・演出の実画像は利用条件が確認できていないため、転載も外部画像の埋め込みも行っていません。'));}
-function renderGlossary(q=''){const target=$('glossary');target.replaceChildren();const list=dictionary.filter(([term,body])=>(term+body).toLowerCase().includes(q.toLowerCase()));list.forEach(([term,body])=>{const item=el('div',undefined,'term');item.append(el('b',term),el('p',body));target.append(item);});if(!list.length)target.append(el('p','一致する用語がありません。章の重要用語も確認してください。'));}
-$('termSearch').oninput=e=>renderGlossary(e.target.value);
+import { machines, sources } from "./machines.js";
+import { Simulator } from "./engine.js";
+import { chapters } from "./textbook.js";
+import { dictionary } from "./glossary.js";
+const $ = (id) => document.getElementById(id);
+const el = (tag, text, cls) => {
+  const n = document.createElement(tag);
+  if (text !== undefined) n.textContent = text;
+  if (cls) n.className = cls;
+  return n;
+};
+const link = (text, href) => {
+  const a = el("a", text);
+  a.href = href;
+  return a;
+};
+const sim = new Simulator();
+let chapter = chapters[0];
+let quizIndex = 0,
+  quizScore = 0,
+  answered = false;
+const ids = ["learn", "sim", "machine", "words", "quiz", "resources"];
+function route() {
+  const [view, chapterId] = location.hash.slice(1).split("/");
+  const active = ids.includes(view) ? view : "learn";
+  if (active === "learn" && chapterId) {
+    chapter = chapters.find((c) => c.id === chapterId) || chapters[0];
+    renderChapter();
+  }
+  document.querySelectorAll("main>.view").forEach((n) => {
+    n.classList.toggle("active", n.id === "view-" + active);
+    n.hidden = n.id !== "view-" + active;
+  });
+  document.querySelectorAll("[data-view]").forEach((a) => {
+    a.classList.toggle("active", a.dataset.view === active);
+    if (a.dataset.view === active) a.setAttribute("aria-current", "page");
+    else a.removeAttribute("aria-current");
+  });
+}
+function chapterHref(id) {
+  return "#learn/" + id;
+}
+function chapterArticle(c) {
+  const article = el("article");
+  article.append(
+    el("p", c.part + "編", "eyebrow"),
+    el("h2", c.title),
+    el("p", "学習目標：" + c.goal, "notice"),
+    el("h3", "重要用語"),
+  );
+  const terms = el("p");
+  c.terms.split("・").forEach((t, i) => {
+    if (i) terms.append(" ／ ");
+    const a = link(t, "#words");
+    a.onclick = () => {
+      $("termSearch").value = t;
+      renderGlossary(t);
+    };
+    terms.append(a);
+  });
+  article.append(
+    terms,
+    el("h3", "仕組みと理由"),
+    ...c.body.split("\n\n").map((p) => el("p", p)),
+    el("h3", "図で確認"),
+  );
+  const diagram = el("div", undefined, "diagram");
+  diagram.setAttribute("aria-label", "学習フロー");
+  c.flow.forEach((step) => diagram.append(el("span", step)));
+  article.append(diagram, el("h3", "具体例・操作で試す"), el("p", c.example));
+  const details = el("details");
+  details.append(el("summary", "復習：" + c.q), el("p", c.a));
+  article.append(details);
+  if (c.sourceIds?.length) {
+    const refs = el("div", undefined, "chapter-sources");
+    sourceCards(
+      refs,
+      sources.filter((s) => c.sourceIds.includes(s.id)),
+    );
+    article.append(el("h3", "出典・確認日"), refs);
+  }
+  return article;
+}
+function renderChapter() {
+  const target = $("chapterContent");
+  target.replaceChildren(chapterArticle(chapter));
+  $("chapterSelect").value = chapter.id;
+  document.querySelectorAll("#chapterNav a").forEach((a) => {
+    if (a.hash === chapterHref(chapter.id))
+      a.setAttribute("aria-current", "true");
+    else a.removeAttribute("aria-current");
+  });
+  const nav = el("div", undefined, "chapter-controls");
+  const i = chapters.indexOf(chapter);
+  if (i > 0) nav.append(link("← 前の章", chapterHref(chapters[i - 1].id)));
+  nav.append(link("デモで試す", "#sim"));
+  if (i < chapters.length - 1)
+    nav.append(link("次の章 →", chapterHref(chapters[i + 1].id)));
+  else nav.append(link("理解度を確認 →", "#quiz"));
+  target.append(nav);
+}
+for (const c of chapters) {
+  const option = el("option", c.part + "｜" + c.title);
+  option.value = c.id;
+  $("chapterSelect").append(option);
+  $("chapterNav").append(link(c.title, chapterHref(c.id)));
+}
+$("chapterSelect").onchange = (e) => {
+  location.hash = chapterHref(e.target.value);
+};
+for (const id of ["simMachine", "machineSelect"]) {
+  for (const m of Object.values(machines)) {
+    const option = el("option", m.name);
+    option.value = m.id;
+    $(id).append(option);
+  }
+  $(id).onchange = (e) => {
+    sim.reset(e.target.value);
+    $("forceRole").value = "";
+    $("outcome").value = "random";
+    $("aim").checked = true;
+    render();
+    renderMachine();
+  };
+}
+function render() {
+  const s = sim.s,
+    m = sim.machine;
+  for (const id of ["simMachine", "machineSelect"]) $(id).value = m.id;
+  $("simMachineName").textContent = m.name;
+  $("phaseBadge").textContent = sim.node.name;
+  $("phaseName").textContent = sim.node.name;
+  $("phaseGoal").textContent = sim.node.goal;
+  $("credit").textContent = s.credit;
+  $("totalG").textContent = s.total + "G";
+  $("phaseG").textContent = s.g + "G";
+  $("roleNote").textContent =
+    "成立役：" +
+    (s.role || "未抽選") +
+    (s.cycle === "spin" ? "（レバーで決定済み）" : "");
+  $("message").textContent = s.message;
+  $("scWins").textContent =
+    m.id === "sao2"
+      ? "教材SC勝利数：" +
+        s.scWins +
+        "勝" +
+        (s.upperRight ? "／上位CZ挑戦権あり" : "")
+      : "架空機にはSCはありません";
+  $("lastReturnBtn").hidden = m.id !== "sao2";
+  $("rareReturnBtn").hidden = m.id !== "sao2";
+  $("paid").textContent =
+    "今回の払い出し：" +
+    s.paid +
+    "枚／次Gの追加投入：" +
+    (s.replay ? "不要" : "3枚");
+  $("modelNote").textContent = m.factNote;
+  $("betBtn").disabled = s.cycle !== "ready";
+  $("leverBtn").disabled = s.cycle !== "bet";
+  $("forceRole").disabled = s.cycle === "spin";
+  $("outcome").disabled = s.cycle === "spin";
+  $("aim").disabled = s.cycle === "spin" && s.stopped[1];
+  [0, 1, 2].forEach((i) => {
+    const stopped = s.cycle !== "spin" || s.stopped[i];
+    $("stop" + i).disabled = s.cycle !== "spin" || s.stopped[i];
+    const r = $("reel" + i);
+    r.classList.toggle("spinning", !stopped);
+    r.replaceChildren();
+    ["BAR", stopped ? s.role || "—" : "回転中", "7"].forEach((text) =>
+      r.append(el("span", text, "symbol")),
+    );
+    if (stopped && s.role === "スイカ" && !s.aim)
+      r.children[1].textContent = "外れた停止形";
+  });
+  $("mobileWhere").textContent =
+    sim.node.name + "｜" + s.g + "G消化・残り" + s.remaining + "G";
+  $("whereCount").textContent =
+    sim.node.name + "｜消化" + s.g + "G／残り" + s.remaining + "G（教材）";
+  $("progress").style.transition = s.g === 0 ? "none" : "width .25s";
+  $("progress").style.width =
+    Math.min(100, (s.g / (s.g + s.remaining)) * 100) + "%";
+  $("flowNodes").replaceChildren();
+  Object.entries(m.nodes).forEach(([key, node]) => {
+    const b = el("button", node.name, key === s.phase ? "current" : "");
+    b.type = "button";
+    b.dataset.phase = key;
+    if (key === s.phase) b.setAttribute("aria-current", "step");
+    b.onclick = () => {
+      sim.jump(key);
+      render();
+    };
+    $("flowNodes").append(b);
+  });
+  $("edges").replaceChildren();
+  m.edges.forEach(([from, to, condition]) => {
+    $("edges").append(
+      el(
+        "li",
+        m.nodes[from].name + " → " + m.nodes[to].name + "：" + condition,
+        from === s.phase ? "active-edge" : "",
+      ),
+    );
+  });
+  $("whereWhy").textContent =
+    s.history[0]?.reason || "開始：通常時で基本操作から練習します。";
+  $("relatedChapter").href = chapterHref(sim.node.chapter);
+  $("eventLog").replaceChildren();
+  s.history.forEach((h) =>
+    $("eventLog").append(
+      el(
+        "li",
+        h.total +
+          "G：" +
+          m.nodes[h.from].name +
+          " → " +
+          m.nodes[h.to].name +
+          "。" +
+          h.reason,
+      ),
+    ),
+  );
+  $("lastEnd").textContent = s.lastEnd
+    ? "直前の教材終了情報：総" +
+      s.lastEnd.total +
+      "G／" +
+      s.lastEnd.credit +
+      "枚／SC " +
+      s.lastEnd.scWins +
+      "勝。復帰後もこの記録を保持。"
+    : "AT終了情報：まだなし。";
+}
+$("lastReturnBtn").onclick = () => {
+  sim.practiceReturnFinal("ベル");
+  $("forceRole").value = "ベル";
+  render();
+};
+$("rareReturnBtn").onclick = () => {
+  sim.practiceReturnFinal("チェリー");
+  $("forceRole").value = "チェリー";
+  render();
+};
+$("showFlow").onclick = () =>
+  document.querySelector(".live-flow").scrollIntoView({ block: "start" });
+$("betBtn").onclick = () => {
+  sim.bet();
+  render();
+};
+$("leverBtn").onclick = () => {
+  if ($("forceRole").value) sim.force($("forceRole").value);
+  sim.lever();
+  $("forceRole").value = "";
+  render();
+};
+[0, 1, 2].forEach(
+  (i) =>
+    ($("stop" + i).onclick = () => {
+      sim.stop(i, $("aim").checked);
+      render();
+    }),
+);
+$("aim").onchange = () => {
+  sim.s.aim = $("aim").checked;
+};
+$("outcome").onchange = (e) => {
+  sim.s.outcome = e.target.value;
+};
+$("resetBtn").onclick = () => {
+  sim.reset();
+  $("outcome").value = "random";
+  $("forceRole").value = "";
+  $("aim").checked = true;
+  render();
+};
+function sourceCards(target, list) {
+  target.replaceChildren();
+  list.forEach((s) => {
+    const card = el("div");
+    card.append(
+      link(s.name, s.url),
+      el(
+        "p",
+        "本文確認日：" +
+          (s.checked || "未確認") +
+          (s.updated ? "／出典更新日：" + s.updated : "") +
+          "／取得試行日：" +
+          s.attempted +
+          "／" +
+          s.status,
+        "small",
+      ),
+    );
+    target.append(card);
+  });
+}
+function renderMachine() {
+  const m = sim.machine,
+    target = $("machineContent");
+  target.replaceChildren(
+    el("h3", m.name),
+    el("p", m.description),
+    el("p", m.factNote, "notice"),
+  );
+  const sketch = el("div", undefined, "schematic");
+  sketch.setAttribute("role", "img");
+  sketch.setAttribute(
+    "aria-label",
+    "独自作成の筐体模式図。実機写真ではありません",
+  );
+  sketch.append(
+    el("b", m.fictional ? "架空教材機" : "SAO2 題材"),
+    el("span", "▥　▥　▥"),
+    el("small", "独自の模式図／実機画像ではありません"),
+  );
+  target.append(sketch);
+  const table = el("table", undefined, "table");
+  m.facts.forEach(([k, v, refs = []]) => {
+    const tr = el("tr");
+    const th = el("th", k);
+    th.scope = "row";
+    const td = el("td", v);
+    refs.forEach((id) => {
+      const source = sources.find((s) => s.id === id);
+      td.append(" ", link("［出典］", source.url));
+    });
+    tr.append(th, td);
+    table.append(tr);
+  });
+  target.append(table);
+  if (m.settingSpecs) {
+    target.append(
+      el("h3", "設定別性能（一撃の解析値）"),
+      el(
+        "p",
+        "2026-10-26本文照合。出玉率は勝率ではありません。設定5のAT初当たりが設定4より軽いとは限らない点にも注意。",
+      ),
+    );
+    const specs = el("table", undefined, "table");
+    const row = el("tr");
+    ["設定", "CZ初当たり", "AT初当たり", "出玉率"].forEach((t) => {
+      const th = el("th", t);
+      th.scope = "col";
+      row.append(th);
+    });
+    specs.append(row);
+    m.settingSpecs.forEach((values) => {
+      const tr = el("tr");
+      values.forEach((v) => tr.append(el("td", v)));
+      specs.append(tr);
+    });
+    target.append(
+      specs,
+      link("設定別性能の出典", sources.find((s) => s.id === "1geki").url),
+    );
+  }
+  target.append(el("h3", "教材用の設定（実機値ではありません）"));
+  const values = el("p");
+  values.textContent =
+    "投入" +
+    m.model.bet +
+    "枚／ベル" +
+    m.model.bell +
+    "枚／スイカ" +
+    m.model.watermelon +
+    "枚。" +
+    (m.fictional
+      ? "通常6G・ボーナス4G。"
+      : "通常8G・CZ5G・AT8G・ラストアタック5G・上位CZ3G・上位AT8G・終了後50G。CZ成功55%、上位CZ50%、ラストアタック30%、終了後毎G1.2%（50G目チェリー／スイカのみ90%）。いずれも未判明の実機確率の代用ではなく教材仮値です。AT中チェリーをSC勝利として数え、3勝で上位CZ権利。＋2G上乗せは最大2回。復帰時はSC勝利数を保持。");
+  target.append(
+    values,
+    link("選択した機種を操作する →", "#sim"),
+    el("h3", "教材と関連資料"),
+  );
+  target.append(
+    link("機種別の教科書", chapterHref(m.fictional ? "b-aim" : "s-spec")),
+  );
+  if (m.sources.length) {
+    const holder = el("div");
+    sourceCards(
+      holder,
+      sources.filter((s) => m.sources.includes(s.id)),
+    );
+    target.append(holder);
+  } else
+    target.append(
+      el(
+        "p",
+        "実在機種・メーカーとの関係はありません。実機情報の出典はありません。",
+      ),
+    );
+  target.append(
+    el(
+      "p",
+      "筐体・演出の実画像は利用条件が確認できていないため、転載も外部画像の埋め込みも行っていません。",
+    ),
+  );
+}
+function renderGlossary(q = "") {
+  const target = $("glossary");
+  target.replaceChildren();
+  const list = dictionary.filter(([term, body]) =>
+    (term + body).toLowerCase().includes(q.toLowerCase()),
+  );
+  list.forEach(([term, body]) => {
+    const item = el("div", undefined, "term");
+    item.append(el("b", term), el("p", body));
+    target.append(item);
+  });
+  if (!list.length)
+    target.append(
+      el("p", "一致する用語がありません。章の重要用語も確認してください。"),
+    );
+}
+$("termSearch").oninput = (e) => renderGlossary(e.target.value);
 // 旧デモの辞典中の未照合な機種限定表現を共通表現に置換する。
-for(const item of dictionary){item[1]=item[1].replace('SAO2は1～6。','機種ごとに段階が異なります。');}
-const distractors = ['停止ボタンを押せば、未成立の役でも当たりを作れる。','スマスロは物理メダルがないので、実際の遊技も無料。','停止形は払い出された枚数のこと。','目押しに成功するほどレア役の内部成立率が上がる。','レア役が成立すれば、必ずCZやATへ進む。','CZに入った時点で、ATとプラス収支が確定する。','残り50と表示されていれば、どの機種でも必ず50G。','演出が出た瞬間が必ず抽選した瞬間。','ゾーンを通過するたび、次の当選が保証される。','CZを経由しないATは必ず誤動作。','出玉率110%は、毎日の勝率が110%という意味。','他機種の虹色トロフィーの意味を、SAO2にもそのまま使える。','平均期待値がプラスなら、今回の損失は発生しない。','100Gで演出が出れば、モードと当選の両方が確定。','画面上でATが終われば、すべての内部区間も必ず終わる。','過去に負けた金額が大きいほど、次の抽選が有利になる。','差枚グラフがプラスなら、貸出率や交換率を見なくても収支が分かる。','独立1/100抽選なら、100回までには必ず当たる。','複数のG数があったら、最大の数字を天井計算に使えばよい。','教材のCZ成功率から実機設定を推測できる。','教材リールと実機配列は同じなので、そのまま目押し練習に使える。','CZ間G、AT間G、液晶Gはすべて同じ値になる。','教材CZは5Gなので、実機のCZも5G。','教材の残り8GはSAO2実機のAT初期G数を表す。','上位CZに入った時点でFULL DIVEが確定する。','教材の50G区間を回せば、実機でも必ず利益が出る。','原稿に確認日があれば、今回も再確認できたことになる。','練習で毎回成功したら、実機でも同じ順番で必ず成功する。'];
-function renderQuiz(){answered=false;const c=chapters[quizIndex];$('quizCounter').textContent=(quizIndex+1)+' / '+chapters.length+'問｜正解 '+quizScore;$('question').textContent=c.q;$('feedback').textContent='';$('choices').replaceChildren();$('quizNext').disabled=true;$('quizChapter').href=chapterHref(c.id);const correctIndex=quizIndex%2;const answers=correctIndex===0?[c.a,distractors[quizIndex]]:[distractors[quizIndex],c.a];answers.forEach((text,i)=>{const b=el('button',text,'quiz-choice');b.onclick=()=>{if(answered)return;answered=true;if(i===correctIndex)quizScore++;$('feedback').textContent=(i===correctIndex?'正解。':'もう一度確認しましょう。')+c.a;[...$('choices').children].forEach((n,j)=>{n.disabled=true;n.classList.toggle('correct',j===correctIndex);});$('quizNext').disabled=false;};$('choices').append(b);});}
-$('quizNext').onclick=()=>{if(!answered)return;if(quizIndex===chapters.length-1){$('question').textContent='28問終了：'+quizScore+'問正解';$('choices').replaceChildren();$('feedback').textContent='関連する章を読み返し、デモで説明できるか確認してください。';$('quizNext').disabled=true;}else{quizIndex++;renderQuiz();}};$('quizRestart').onclick=()=>{quizIndex=0;quizScore=0;renderQuiz();};
-$('printBook').onclick=()=>{location.hash='#learn';route();$('chapterContent').replaceChildren(...chapters.map(chapterArticle));window.print();renderChapter();};
-window.addEventListener('hashchange',route);sourceCards($('sourceList'),sources);renderGlossary();renderChapter();renderMachine();renderQuiz();render();route();
+for (const item of dictionary) {
+  item[1] = item[1].replace("SAO2は1～6。", "機種ごとに段階が異なります。");
+}
+const distractors = [
+  "停止ボタンを押せば、未成立の役でも当たりを作れる。",
+  "スマスロは物理メダルがないので、実際の遊技も無料。",
+  "停止形は払い出された枚数のこと。",
+  "目押しに成功するほどレア役の内部成立率が上がる。",
+  "レア役が成立すれば、必ずCZやATへ進む。",
+  "CZに入った時点で、ATとプラス収支が確定する。",
+  "残り50と表示されていれば、どの機種でも必ず50G。",
+  "演出が出た瞬間が必ず抽選した瞬間。",
+  "ゾーンを通過するたび、次の当選が保証される。",
+  "CZを経由しないATは必ず誤動作。",
+  "出玉率110%は、毎日の勝率が110%という意味。",
+  "他機種の虹色トロフィーの意味を、SAO2にもそのまま使える。",
+  "平均期待値がプラスなら、今回の損失は発生しない。",
+  "100Gで演出が出れば、モードと当選の両方が確定。",
+  "画面上でATが終われば、すべての内部区間も必ず終わる。",
+  "過去に負けた金額が大きいほど、次の抽選が有利になる。",
+  "差枚グラフがプラスなら、貸出率や交換率を見なくても収支が分かる。",
+  "独立1/100抽選なら、100回までには必ず当たる。",
+  "複数のG数があったら、最大の数字を天井計算に使えばよい。",
+  "教材のCZ成功率から実機設定を推測できる。",
+  "教材リールと実機配列は同じなので、そのまま目押し練習に使える。",
+  "CZ間G、AT間G、液晶Gはすべて同じ値になる。",
+  "教材CZは5Gなので、実機のCZも5G。",
+  "教材の残り8GはSAO2実機のAT初期G数を表す。",
+  "上位CZに入った時点でFULL DIVEが確定する。",
+  "教材の50G区間を回せば、実機でも必ず利益が出る。",
+  "原稿に確認日があれば、今回も再確認できたことになる。",
+  "練習で毎回成功したら、実機でも同じ順番で必ず成功する。",
+];
+function renderQuiz() {
+  answered = false;
+  const c = chapters[quizIndex];
+  $("quizCounter").textContent =
+    quizIndex + 1 + " / " + chapters.length + "問｜正解 " + quizScore;
+  $("question").textContent = c.q;
+  $("feedback").textContent = "";
+  $("choices").replaceChildren();
+  $("quizNext").disabled = true;
+  $("quizChapter").href = chapterHref(c.id);
+  const correctIndex = quizIndex % 2;
+  const answers =
+    correctIndex === 0
+      ? [c.a, distractors[quizIndex]]
+      : [distractors[quizIndex], c.a];
+  answers.forEach((text, i) => {
+    const b = el("button", text, "quiz-choice");
+    b.onclick = () => {
+      if (answered) return;
+      answered = true;
+      if (i === correctIndex) quizScore++;
+      $("feedback").textContent =
+        (i === correctIndex ? "正解。" : "もう一度確認しましょう。") + c.a;
+      [...$("choices").children].forEach((n, j) => {
+        n.disabled = true;
+        n.classList.toggle("correct", j === correctIndex);
+      });
+      $("quizNext").disabled = false;
+    };
+    $("choices").append(b);
+  });
+}
+$("quizNext").onclick = () => {
+  if (!answered) return;
+  if (quizIndex === chapters.length - 1) {
+    $("question").textContent = "28問終了：" + quizScore + "問正解";
+    $("choices").replaceChildren();
+    $("feedback").textContent =
+      "関連する章を読み返し、デモで説明できるか確認してください。";
+    $("quizNext").disabled = true;
+  } else {
+    quizIndex++;
+    renderQuiz();
+  }
+};
+$("quizRestart").onclick = () => {
+  quizIndex = 0;
+  quizScore = 0;
+  renderQuiz();
+};
+$("printBook").onclick = () => {
+  location.hash = "#learn";
+  route();
+  $("chapterContent").replaceChildren(...chapters.map(chapterArticle));
+  window.print();
+  renderChapter();
+};
+window.addEventListener("hashchange", route);
+sourceCards($("sourceList"), sources);
+renderGlossary();
+renderChapter();
+renderMachine();
+renderQuiz();
+render();
+route();
