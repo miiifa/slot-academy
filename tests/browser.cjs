@@ -16,11 +16,12 @@ const fs = require("node:fs");
         hasTouch: width < 500,
       });
       const errors = [];
+      page.on("dialog", d=>d.accept());
       page.on("pageerror", (e) => errors.push(e.message));
       page.on("response", (r) => {
         if (r.status() >= 400) errors.push(r.status() + " " + r.url());
       });
-      await page.goto(root);
+      await page.goto(root.replace(/\/$/, "")+"/advanced.html");
       await page.waitForSelector("#chapterContent h2");
       for (const view of [
         "learn",
@@ -123,6 +124,9 @@ const fs = require("node:fs");
         /通常6G/,
       );
       await page.selectOption("#machineSelect", "sao2");
+      assert.equal(await page.locator("#simMachine").inputValue(),"lab");
+      await page.locator("#machineContent a").filter({hasText:"選択した機種を操作する"}).click();
+      await page.locator('[data-view="machine"]').click();
       assert.match(
         await page.locator("#machineContent").textContent(),
         /解析本文と照合/,

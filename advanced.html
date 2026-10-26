@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#091220" />
+    <meta
+      name="description"
+      content="基礎から学び、操作とフローで理解するスロット教材。SAO2を題材にした非公式の簡略デモ。"
+    />
+    <title>Slot Academy｜学ぶ・触る・理解する</title>
+    <link rel="stylesheet" href="app/styles.css" />
+    <script type="module" src="app/main.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">本文へ移動</a>
+    <div class="wrap">
+      <header class="top">
+        <div class="logo">
+          <span class="logo-mark">▥</span> SLOT ACADEMY
+          <span class="tag">無料の非公式教材</span>
+        </div>
+        <div class="hero">
+          <div>
+            <div class="eyebrow">LEARN → TRY → UNDERSTAND</div>
+            <h1>仕組みを学ぶ。<br />動かして、理解する。</h1>
+            <p class="muted">
+              基礎教科書 → 操作デモ → 応用 → 機種別教材 →
+              理解度確認。いつでも行き来できます。
+            </p>
+          </div>
+        </div>
+        <p class="notice">
+          現金・課金なし。リール・確率・払い出し・G数は<strong>教材用の簡略モデル</strong>です。実機情報には出典と確認日を表示します。デモは実機の攻略や終了判断には使えません。
+        </p>
+      </header>
+      <nav class="nav" aria-label="学習メニュー">
+        <a href="#learn" data-view="learn">① 基礎・応用教科書</a
+        ><a href="#sim" data-view="sim">② 操作デモ・フロー</a
+        ><a href="#machine" data-view="machine">③ 機種を選ぶ</a
+        ><a href="#words" data-view="words">用語辞典</a
+        ><a href="#quiz" data-view="quiz">④ 理解度確認</a
+        ><a href="#resources" data-view="resources">資料・出典</a>
+      </nav>
+      <p><a href="index.html">← 全体像・簡単操作へ戻る</a></p><main id="main" tabindex="-1">
+        <section
+          id="view-learn"
+          class="view active"
+          aria-labelledby="learnTitle"
+        >
+          <h2 id="learnTitle">共通基礎 → 応用 → SAO2</h2>
+          <p class="muted">各章の目標・図解・例・復習を順に確認します。</p>
+          <div class="learning-layout">
+            <aside class="card chapter-index">
+              <label for="chapterSelect">読みたい章</label
+              ><select id="chapterSelect"></select>
+              <div id="chapterNav"></div>
+            </aside>
+            <article
+              id="chapterContent"
+              class="card content"
+              tabindex="-1"
+            ></article>
+          </div>
+        </section>
+        <section id="view-sim" class="view" aria-labelledby="simTitle">
+          <h2 id="simTitle">操作と現在地を一緒に確認</h2>
+          <div class="picker">
+            <label
+              >練習機種
+              <select id="simMachine"></select></label
+            ><label
+              >次Gの成立役
+              <select id="forceRole">
+                <option value="">ランダム</option>
+                <option>ベル</option>
+                <option>リプレイ</option>
+                <option>チェリー</option>
+                <option>スイカ</option>
+                <option>ハズレ</option>
+              </select></label
+            ><label
+              >練習結果
+              <select id="outcome">
+                <option value="random">仮の抽選</option>
+                <option value="success">成功を体験</option>
+                <option value="failure">失敗を体験</option>
+              </select></label
+            >
+          </div>
+          <p class="small muted">
+            結果指定・練習移動は教材専用です。全機種で左→中→右の練習手順を使い、実機の押し順ナビ・リール制御は再現しません。
+          </p>
+          <div class="mobile-location" role="status" aria-live="polite">
+            <strong id="mobileWhere"></strong
+            ><button id="showFlow" class="btn">フローを見る ↓</button>
+          </div>
+          <div class="layout">
+            <div class="card">
+              <div class="card-header">
+                <h3 id="simMachineName"></h3>
+                <span class="sticker" id="phaseBadge"></span>
+              </div>
+              <div class="stats">
+                <div class="stat">
+                  <span>架空コイン</span><b id="credit"></b>
+                </div>
+                <div class="stat"><span>総消化G</span><b id="totalG"></b></div>
+                <div class="stat"><span>現在区間</span><b id="phaseG"></b></div>
+              </div>
+              <div class="display">
+                <h3 id="phaseName"></h3>
+                <p id="phaseGoal"></p>
+                <div class="reels">
+                  <div class="reel" id="reel0" aria-label="左リール"></div>
+                  <div class="reel" id="reel1" aria-label="中リール"></div>
+                  <div class="reel" id="reel2" aria-label="右リール"></div>
+                </div>
+                <p id="roleNote"></p>
+                <label class="aim"
+                  ><input id="aim" type="checkbox" checked />
+                  スイカを狙う（停止形の比較用）</label
+                >
+              </div>
+              <div
+                class="log"
+                role="status"
+                aria-live="polite"
+                id="message"
+              ></div>
+              <div class="actions">
+                <button id="betBtn" class="btn primary">① MAX BET</button
+                ><button id="leverBtn" class="btn secondary">② レバーON</button>
+              </div>
+              <div class="stop-buttons">
+                <button id="stop0" class="btn">左 STOP</button
+                ><button id="stop1" class="btn">中 STOP</button
+                ><button id="stop2" class="btn">右 STOP</button>
+              </div>
+              <p id="paid"></p>
+              <p id="scWins" role="status"></p>
+              <div class="quick-actions">
+                <button id="lastReturnBtn" class="btn">
+                  引き戻し50G目から練習</button
+                ><button id="rareReturnBtn" class="btn">
+                  50G目レア役を比較
+                </button>
+              </div>
+              <button id="resetBtn" class="btn ghost">
+                リセット・無料補充
+              </button>
+              <p class="small" id="modelNote"></p>
+            </div>
+            <aside class="card live-flow" aria-label="現在地付きゲームフロー">
+              <h3>今どこ？ 何を目指す？</h3>
+              <p id="whereCount" aria-live="polite"></p>
+              <div class="meter" aria-hidden="true"><i id="progress"></i></div>
+              <div id="flowNodes" class="flow"></div>
+              <details open>
+                <summary>成功・失敗と例外ルート</summary>
+                <ul id="edges"></ul>
+              </details>
+              <p id="whereWhy" role="status"></p>
+              <a id="relatedChapter" class="chip" href="#learn"
+                >この状態の教科書へ</a
+              >
+              <h3>最近の移動</h3>
+              <ol id="eventLog"></ol>
+              <p id="lastEnd" class="small"></p>
+            </aside>
+          </div>
+        </section>
+        <section
+          id="view-machine"
+          class="view content"
+          aria-labelledby="machineTitle"
+        >
+          <h2 id="machineTitle">機種別ライブラリー</h2>
+          <label
+            >機種
+            <select id="machineSelect"></select
+          ></label>
+          <div id="machineContent" class="card"></div>
+        </section>
+        <section
+          id="view-words"
+          class="view content"
+          aria-labelledby="wordsTitle"
+        >
+          <h2 id="wordsTitle">用語辞典</h2>
+          <label for="termSearch">分からない言葉を検索</label
+          ><input
+            id="termSearch"
+            class="input"
+            type="search"
+            placeholder="例：純増、目押し、引き戻し"
+          />
+          <div id="glossary" class="glossary"></div>
+        </section>
+        <section
+          id="view-quiz"
+          class="view content"
+          aria-labelledby="quizTitle"
+        >
+          <h2 id="quizTitle">理解度確認</h2>
+          <p>各章から1問ずつ。回答後に理由と教材へのリンクを表示します。</p>
+          <div class="card">
+            <p id="quizCounter"></p>
+            <h3 id="question"></h3>
+            <div id="choices"></div>
+            <p id="feedback" role="status"></p>
+            <a id="quizChapter" href="#learn">関連する章を読む</a>
+            <p>
+              <button id="quizNext" class="btn primary">次の問題</button>
+              <button id="quizRestart" class="btn ghost">最初から</button>
+            </p>
+          </div>
+        </section>
+        <section
+          id="view-resources"
+          class="view content"
+          aria-labelledby="resourcesTitle"
+        >
+          <h2 id="resourcesTitle">資料と確認状況</h2>
+          <div class="card">
+            <p>
+              ブラウザーで読める28章が現在の学習入口です。元のMarkdown・図解・旧デモは引き継ぎ資料として保存しています。現在の教材の主要項目は出典本文と照合しましたが、保管資料全体の校訂は未完了です。<a
+                href="docs/SOURCES.md"
+                >確認範囲と未判明事項</a
+              >を確認してください。
+            </p>
+            <p>
+              <a href="docs/sao2-textbook.md">既存原稿（再照合前）</a> ／
+              <a href="docs/sao2-textbook-legacy.html">旧教科書（再照合前）</a>
+              ／ <a href="docs/sao2-visual-guide.html">旧図解（再照合前）</a> ／
+              <a href="demo/index.html">旧デモ（保管用）</a>
+            </p>
+            <p>
+              PDF原本・実画像・ZIPは未移管です。存在しないPDFへのリンクは設けていません。<a
+                href="docs/ASSET_STATUS.md"
+                >資産状況</a
+              >
+            </p>
+            <button class="btn" id="printBook">教科書を印刷・PDF保存</button>
+            <p class="small">
+              ブラウザーの印刷機能で現在の28章を保存できます。旧PDFと同一ではありません。
+            </p>
+          </div>
+          <div id="sourceList" class="card"></div>
+        </section>
+      </main>
+      <footer class="footer">
+        Slot
+        Academy｜非公式の教育用シミュレーター。実機画像は未使用。18歳未満の遊技不可。<a
+          href="#resources"
+          >出典・未確認事項</a
+        >
+      </footer>
+    </div>
+  </body>
+</html>

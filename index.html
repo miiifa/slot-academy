@@ -1,264 +1,165 @@
 <!doctype html>
-<html lang="ja">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#091220" />
-    <meta
-      name="description"
-      content="基礎から学び、操作とフローで理解するスロット教材。SAO2を題材にした非公式の簡略デモ。"
-    />
-    <title>Slot Academy｜学ぶ・触る・理解する</title>
-    <link rel="stylesheet" href="app/styles.css" />
-    <script type="module" src="app/main.js"></script>
-  </head>
-  <body>
-    <a class="skip" href="#main">本文へ移動</a>
-    <div class="wrap">
-      <header class="top">
-        <div class="logo">
-          <span class="logo-mark">▥</span> SLOT ACADEMY
-          <span class="tag">無料の非公式教材</span>
-        </div>
-        <div class="hero">
-          <div>
-            <div class="eyebrow">LEARN → TRY → UNDERSTAND</div>
-            <h1>仕組みを学ぶ。<br />動かして、理解する。</h1>
-            <p class="muted">
-              基礎教科書 → 操作デモ → 応用 → 機種別教材 →
-              理解度確認。いつでも行き来できます。
-            </p>
-          </div>
-        </div>
-        <p class="notice">
-          現金・課金なし。リール・確率・払い出し・G数は<strong>教材用の簡略モデル</strong>です。実機情報には出典と確認日を表示します。デモは実機の攻略や終了判断には使えません。
-        </p>
-      </header>
-      <nav class="nav" aria-label="学習メニュー">
-        <a href="#learn" data-view="learn">① 基礎・応用教科書</a
-        ><a href="#sim" data-view="sim">② 操作デモ・フロー</a
-        ><a href="#machine" data-view="machine">③ 機種を選ぶ</a
-        ><a href="#words" data-view="words">用語辞典</a
-        ><a href="#quiz" data-view="quiz">④ 理解度確認</a
-        ><a href="#resources" data-view="resources">資料・出典</a>
-      </nav>
-      <main id="main" tabindex="-1">
-        <section
-          id="view-learn"
-          class="view active"
-          aria-labelledby="learnTitle"
-        >
-          <h2 id="learnTitle">共通基礎 → 応用 → SAO2</h2>
-          <p class="muted">各章の目標・図解・例・復習を順に確認します。</p>
-          <div class="learning-layout">
-            <aside class="card chapter-index">
-              <label for="chapterSelect">読みたい章</label
-              ><select id="chapterSelect"></select>
-              <div id="chapterNav"></div>
-            </aside>
-            <article
-              id="chapterContent"
-              class="card content"
-              tabindex="-1"
-            ></article>
-          </div>
-        </section>
-        <section id="view-sim" class="view" aria-labelledby="simTitle">
-          <h2 id="simTitle">操作と現在地を一緒に確認</h2>
-          <div class="picker">
-            <label
-              >練習機種
-              <select id="simMachine"></select></label
-            ><label
-              >次Gの成立役
-              <select id="forceRole">
-                <option value="">ランダム</option>
-                <option>ベル</option>
-                <option>リプレイ</option>
-                <option>チェリー</option>
-                <option>スイカ</option>
-                <option>ハズレ</option>
-              </select></label
-            ><label
-              >練習結果
-              <select id="outcome">
-                <option value="random">仮の抽選</option>
-                <option value="success">成功を体験</option>
-                <option value="failure">失敗を体験</option>
-              </select></label
-            >
-          </div>
-          <p class="small muted">
-            結果指定・練習移動は教材専用です。全機種で左→中→右の練習手順を使い、実機の押し順ナビ・リール制御は再現しません。
-          </p>
-          <div class="mobile-location" role="status" aria-live="polite">
-            <strong id="mobileWhere"></strong
-            ><button id="showFlow" class="btn">フローを見る ↓</button>
-          </div>
-          <div class="layout">
-            <div class="card">
-              <div class="card-header">
-                <h3 id="simMachineName"></h3>
-                <span class="sticker" id="phaseBadge"></span>
-              </div>
-              <div class="stats">
-                <div class="stat">
-                  <span>架空コイン</span><b id="credit"></b>
-                </div>
-                <div class="stat"><span>総消化G</span><b id="totalG"></b></div>
-                <div class="stat"><span>現在区間</span><b id="phaseG"></b></div>
-              </div>
-              <div class="display">
-                <h3 id="phaseName"></h3>
-                <p id="phaseGoal"></p>
-                <div class="reels">
-                  <div class="reel" id="reel0" aria-label="左リール"></div>
-                  <div class="reel" id="reel1" aria-label="中リール"></div>
-                  <div class="reel" id="reel2" aria-label="右リール"></div>
-                </div>
-                <p id="roleNote"></p>
-                <label class="aim"
-                  ><input id="aim" type="checkbox" checked />
-                  スイカを狙う（停止形の比較用）</label
-                >
-              </div>
-              <div
-                class="log"
-                role="status"
-                aria-live="polite"
-                id="message"
-              ></div>
-              <div class="actions">
-                <button id="betBtn" class="btn primary">① MAX BET</button
-                ><button id="leverBtn" class="btn secondary">② レバーON</button>
-              </div>
-              <div class="stop-buttons">
-                <button id="stop0" class="btn">左 STOP</button
-                ><button id="stop1" class="btn">中 STOP</button
-                ><button id="stop2" class="btn">右 STOP</button>
-              </div>
-              <p id="paid"></p>
-              <p id="scWins" role="status"></p>
-              <div class="quick-actions">
-                <button id="lastReturnBtn" class="btn">
-                  引き戻し50G目から練習</button
-                ><button id="rareReturnBtn" class="btn">
-                  50G目レア役を比較
-                </button>
-              </div>
-              <button id="resetBtn" class="btn ghost">
-                リセット・無料補充
-              </button>
-              <p class="small" id="modelNote"></p>
-            </div>
-            <aside class="card live-flow" aria-label="現在地付きゲームフロー">
-              <h3>今どこ？ 何を目指す？</h3>
-              <p id="whereCount" aria-live="polite"></p>
-              <div class="meter" aria-hidden="true"><i id="progress"></i></div>
-              <div id="flowNodes" class="flow"></div>
-              <details open>
-                <summary>成功・失敗と例外ルート</summary>
-                <ul id="edges"></ul>
-              </details>
-              <p id="whereWhy" role="status"></p>
-              <a id="relatedChapter" class="chip" href="#learn"
-                >この状態の教科書へ</a
-              >
-              <h3>最近の移動</h3>
-              <ol id="eventLog"></ol>
-              <p id="lastEnd" class="small"></p>
-            </aside>
-          </div>
-        </section>
-        <section
-          id="view-machine"
-          class="view content"
-          aria-labelledby="machineTitle"
-        >
-          <h2 id="machineTitle">機種別ライブラリー</h2>
-          <label
-            >機種
-            <select id="machineSelect"></select
-          ></label>
-          <div id="machineContent" class="card"></div>
-        </section>
-        <section
-          id="view-words"
-          class="view content"
-          aria-labelledby="wordsTitle"
-        >
-          <h2 id="wordsTitle">用語辞典</h2>
-          <label for="termSearch">分からない言葉を検索</label
-          ><input
-            id="termSearch"
-            class="input"
-            type="search"
-            placeholder="例：純増、目押し、引き戻し"
-          />
-          <div id="glossary" class="glossary"></div>
-        </section>
-        <section
-          id="view-quiz"
-          class="view content"
-          aria-labelledby="quizTitle"
-        >
-          <h2 id="quizTitle">理解度確認</h2>
-          <p>各章から1問ずつ。回答後に理由と教材へのリンクを表示します。</p>
-          <div class="card">
-            <p id="quizCounter"></p>
-            <h3 id="question"></h3>
-            <div id="choices"></div>
-            <p id="feedback" role="status"></p>
-            <a id="quizChapter" href="#learn">関連する章を読む</a>
-            <p>
-              <button id="quizNext" class="btn primary">次の問題</button>
-              <button id="quizRestart" class="btn ghost">最初から</button>
-            </p>
-          </div>
-        </section>
-        <section
-          id="view-resources"
-          class="view content"
-          aria-labelledby="resourcesTitle"
-        >
-          <h2 id="resourcesTitle">資料と確認状況</h2>
-          <div class="card">
-            <p>
-              ブラウザーで読める28章が現在の学習入口です。元のMarkdown・図解・旧デモは引き継ぎ資料として保存しています。現在の教材の主要項目は出典本文と照合しましたが、保管資料全体の校訂は未完了です。<a
-                href="docs/SOURCES.md"
-                >確認範囲と未判明事項</a
-              >を確認してください。
-            </p>
-            <p>
-              <a href="docs/sao2-textbook.md">既存原稿（再照合前）</a> ／
-              <a href="docs/sao2-textbook-legacy.html">旧教科書（再照合前）</a>
-              ／ <a href="docs/sao2-visual-guide.html">旧図解（再照合前）</a> ／
-              <a href="demo/index.html">旧デモ（保管用）</a>
-            </p>
-            <p>
-              PDF原本・実画像・ZIPは未移管です。存在しないPDFへのリンクは設けていません。<a
-                href="docs/ASSET_STATUS.md"
-                >資産状況</a
-              >
-            </p>
-            <button class="btn" id="printBook">教科書を印刷・PDF保存</button>
-            <p class="small">
-              ブラウザーの印刷機能で現在の28章を保存できます。旧PDFと同一ではありません。
-            </p>
-          </div>
-          <div id="sourceList" class="card"></div>
-        </section>
-      </main>
-      <footer class="footer">
-        Slot
-        Academy｜非公式の教育用シミュレーター。実機画像は未使用。18歳未満の遊技不可。<a
-          href="#resources"
-          >出典・未確認事項</a
-        >
-      </footer>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Slot Academy 全体像から学ぶスロット教科書</title>
+<style>
+:root{font-family:system-ui,'Noto Sans JP',sans-serif;line-height:1.7;background:#f6f8fa;color:#142235;color-scheme:light}*{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}a{color:#055eb1} .shell{max-width:960px;padding:22px 18px 48px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}.logo{font-size:16px;font-weight:900;letter-spacing:.04em}.prototype{font-size:11px;border-radius:99px;background:#efe5cb;padding:5px 10px;font-weight:750;color:#6a4e08}h1{font-size:clamp(25px,5vw,40px);line-height:1.35;margin:25px 0 12px}h2{font-size:23px;margin:0 0 10px}h3{font-size:17px;margin:14px 0 8px}.lead{color:#536678;margin:0 0 24px;font-size:15px}.card{background:#fff;border:1px solid #d8e0ea;border-radius:19px;box-shadow:0 12px 35px #1e2d4712;padding:23px;margin-top:17px}.home-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.big{border:1px solid #c7d4e1;background:#fff;text-align:left;border-radius:16px;padding:20px;min-height:129px;color:#172b42}.big strong{display:block;font-size:18px;margin-bottom:7px}.big small{color:#52677b}.big.primary{background:#183955;color:#fff;border-color:#183955}.big.primary small{color:#d6e5f0}.stepmeta{color:#527080;font-size:12px;font-weight:700;letter-spacing:.03em}.track{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:20px 0}.track button{font:inherit;font-size:11px;font-weight:800;background:#e7edf3;border:1px solid #d1dce8;border-radius:9px;min-height:43px;color:#6c7a88;padding:5px}.track button.current{background:#11688d;border-color:#11688d;color:#fff}.track button.visited{background:#d5ebdf;border-color:#9fc6b2;color:#28533a}.stage{border-radius:18px;background:#eef5fa;padding:24px;min-height:225px}.stage .what{font-size:12px;font-weight:800;color:#0b6b91}.stage h2{margin-top:12px}.stage p{font-size:17px;margin:8px 0;color:#25394d}.simple{font-size:14px;border:1px solid #b8d6e6;padding:10px 13px;border-radius:10px;background:#fff;margin-top:17px}.actions{display:flex;gap:10px;margin-top:18px}.btn{border:1px solid #9cadbe;background:#fff;color:#243a53;border-radius:12px;padding:12px 17px;font-weight:800;min-height:48px}.btn.next{background:#11688d;color:#fff;border-color:#11688d;flex:1}.linkline{margin-top:18px;font-size:14px}.hide{display:none!important}.branchbox{margin-top:14px;padding:15px;background:#fff9e9;border:1px solid #f0d7a2;border-radius:12px;font-size:14px}.branchbox button{margin:6px 6px 0 0}.back{background:none;border:0;color:#2c617f;text-decoration:underline;margin-top:18px;font-size:14px}.learn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.lesson{border:1px solid #d6e1ea;padding:15px;border-radius:13px}.lesson summary{font-weight:800;cursor:pointer}.lesson p{font-size:14px;margin-bottom:3px}.warnings{border-left:4px solid #ba8913;padding:8px 13px;background:#fff9e9;color:#634c1f;font-size:13px}.bullets{padding-left:20px}.bullets li{margin:7px 0}.external{display:flex;flex-wrap:wrap;gap:11px;font-size:14px}.muted{color:#55687a}.view{display:none}.view.active{display:block}@media(max-width:620px){.shell{padding:15px 14px 40px}.home-buttons{grid-template-columns:1fr}.big{min-height:86px;padding:16px}.card{padding:16px}.track{gap:3px}.track button{min-height:41px;font-size:10px;padding:3px}.stage{padding:18px;min-height:252px}.learn-grid{grid-template-columns:1fr}}@media(prefers-reduced-motion:no-preference){.stage{animation:fade .22s}@keyframes fade{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:none}}}
+
+.demo-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(270px,.85fr);gap:14px;align-items:start}
+.demo-layout .card{margin-top:0}.demo-title{display:flex;justify-content:space-between;gap:10px;align-items:center}.demo-title h2{margin:0;font-size:21px}.demo-stats{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.demo-stat{background:#f0f5f8;border:1px solid #d9e3ee;border-radius:11px;padding:9px 13px}.demo-stat span{display:block;font-size:12px;color:#587083}.demo-stat strong{font-size:22px;font-variant-numeric:tabular-nums}.machine-screen{background:linear-gradient(145deg,#153958,#0d2239);border-radius:16px;color:#fff;padding:17px;border:2px solid #294960;box-shadow:inset 0 3px 13px #0004}.machine-screen h3{margin:0 0 5px;color:#c8eefb;font-size:18px}.machine-screen p{font-size:13px;color:#daebf7;margin:0 0 12px}.demo-reels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.demo-reel{background:#f8fbfb;border:3px solid #93aebc;border-radius:10px;color:#202d3b;display:grid;grid-template-rows:repeat(3,45px);position:relative;overflow:hidden}.demo-reel span{display:grid;place-items:center;border-bottom:1px solid #dfe8ee;font-weight:900;font-size:23px}.demo-reel span:nth-child(2){background:#e5f9ff}.demo-reel:after{content:'';position:absolute;top:33.33%;left:0;right:0;height:33.33%;border-block:2px solid #f3c164;pointer-events:none}.demo-reel.anim span{filter:blur(2px);animation:pulse .12s infinite alternate}@keyframes pulse{to{transform:translateY(5px)}}
+.demo-explanation{padding:12px 13px;border:1px solid #bad8e7;background:#eaf7fc;border-radius:12px;font-size:14px;color:#1b3a51;margin:14px 0}.demo-instruction{font-weight:800;color:#155c78;margin:10px 0}.demo-play{background:#11688d;color:#fff;border:1px solid #11688d;border-radius:12px;font-size:17px;font-weight:900;padding:15px 20px;width:100%;min-height:58px}.demo-play:disabled{opacity:.5}.decision-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.decision-row .btn{font-size:13px;padding:11px 9px}.demo-manual{border:1px solid #dce4ed;border-radius:12px;margin-top:14px;padding:9px 12px}.demo-manual summary{font-size:14px;cursor:pointer;font-weight:800;color:#274963}.manual-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.manual-grid .btn{padding:9px 3px;min-height:45px;font-size:13px}.manual-grid .span3{grid-column:span 3}.demo-flow{list-style:none;margin:13px 0;padding:0;display:grid;gap:7px}.demo-flow li{display:flex;gap:10px;align-items:center;border:1px solid #d4e1eb;border-radius:11px;padding:9px 11px;font-weight:800;color:#607487;background:#f7f9fb}.demo-flow li span{display:inline-grid;place-items:center;background:#dce8f0;border-radius:50%;width:24px;height:24px;font-size:12px}.demo-flow li.current{background:#dbeff8;color:#0d5877;border:2px solid #14799c}.demo-flow li.current span{background:#146c90;color:white}.demo-flow li.done{background:#ecf4ef;color:#365e46;border-color:#bdd5c6}.demo-flow li.done span{background:#a9ceb8;color:#23543c}.demo-purpose{background:#f5f8fa;border-radius:12px;padding:12px;margin:8px 0 0;font-size:14px}.demo-disclaimer{font-size:12px;color:#576c7f;line-height:1.65;margin:13px 0}.demo-result{font-size:13px;color:#385d75;min-height:30px;margin:11px 0}.sim-intro{margin:0 0 15px;color:#516678;font-size:14px}.demo-sticky{font-size:13px;font-weight:800;background:#e1f2fa;border:1px solid #a9d0e4;color:#155879;border-radius:10px;padding:9px 12px;margin:13px 0}
+@media(max-width:710px){.demo-layout{grid-template-columns:1fr}.demo-layout .card{padding:16px}.demo-reel{grid-template-rows:repeat(3,39px)}.demo-reel span{font-size:21px}}
+@media(max-width:620px){.home-buttons{grid-template-columns:1fr}}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #0b6b91;outline-offset:3px}@media(max-width:710px){.demo-sticky{position:sticky;top:0;z-index:10}.track{gap:3px}.shell{padding:16px 12px}}
+[hidden]{display:none!important}
+</style></head>
+<body><div class="shell"><div class="top"><div class="logo">▤ SLOT ACADEMY</div><span class="prototype">無料・非公式教材</span></div>
+<section id="home" class="view active"><h1>スロットって、<br>結局どういう流れなの？</h1><p class="lead">最初は細かい数字もリール操作も不要。まず「何が起きるゲームか」をつかもう。</p><div class="home-buttons"><button class="big primary" data-to="journey"><strong>▶ 3分で全体像</strong><small>通常時から引き戻しまで、1つずつ体験</small></button><button class="big" data-to="sim"><strong>🎰 スロットを遊んでみる</strong><small>1Gずつ操作しながらCZ・AT・引き戻しを体験</small></button><button class="big" data-to="book"><strong>📖 基礎教科書</strong><small>用語と仕組みを6つのテーマで学ぶ</small></button><button class="big" data-to="reels"><strong>🎯 実機の打ち方</strong><small>実機の配列・図柄と停止形を正しく学ぶ</small></button></div><div class="card"><strong>学習の進め方</strong><p class="muted">まず「3分で全体像」を最後まで進めて、CZ・AT・引き戻しの違いが分かるか確認してください。「遊べるデモ」では架空のコインで基本操作を練習できます。SAO2の実機配列・内部抽選を再現したものではありません。</p></div></section>
+<section id="journey" class="view"><button class="back" data-to="home">← 最初に戻る</button><div class="card"><div class="stepmeta" id="count">STEP 1 / 5</div><h2>いま、どこにいる？</h2><div class="track" id="track"></div><div class="stage" id="stage"><div class="what" id="kind"></div><h2 id="stage-title"></h2><p id="stage-main"></p><div class="simple" id="stage-rule"></div></div><details class="linkline"><summary>もう少し詳しく（任意）</summary><p id="stage-more" class="muted"></p></details><div id="branch" class="branchbox hide"></div><div class="actions"><button class="btn" id="prev">前へ</button><button class="btn next" id="next">次へ →</button></div><p class="linkline"><button class="btn" data-to="sim">流れが分かったら、デモで遊ぶ →</button></p></div></section>
+
+<section id="sim" class="view">
+ <button class="back" data-to="home">← 最初に戻る</button>
+ <h1>やってみよう。<br>1ゲームから、ATまで。</h1>
+ <p class="sim-intro">最初は<strong>「1G回す」だけ</strong>でOK。現在地が動くのを見ながら全体像を体験。慣れたら手動操作も試せます。</p>
+ <div class="demo-sticky" id="simSticky" role="status" aria-live="polite">現在地：通常時</div>
+ <div class="demo-layout">
+  <div class="card">
+    <div class="demo-title"><h2>🎰 おためしスロット</h2><span class="prototype">共通学習用</span></div>
+    <div class="demo-stats"><div class="demo-stat"><span>消化したゲーム</span><strong id="simTotal">0G</strong></div><div class="demo-stat"><span>架空コイン</span><strong id="simCoins">100枚</strong></div></div>
+    <div class="machine-screen">
+      <h3 id="simPhase">通常時</h3><p id="simObjective">CZを目指す</p>
+      <div hidden class="demo-reels" aria-label="学習用の架空リール3本。SAO2実機の図柄配列ではありません。">
+        <div class="demo-reel" id="mockReel0"><span>7</span><span>🍒</span><span>🔔</span></div>
+        <div class="demo-reel" id="mockReel1"><span>🔔</span><span>🍉</span><span>7</span></div>
+        <div class="demo-reel" id="mockReel2"><span>🍉</span><span>🔔</span><span>BAR</span></div>
+      </div>
+      <p style="margin:9px 0 0;text-align:center;font-size:11px;color:#b9e1ee">リール画像は表示しません。成立役と操作の段階を文章で確かめる概念教材です。</p>
     </div>
-  </body>
-</html>
+    <div class="demo-explanation" id="simExplain" role="status" aria-live="polite">まずは「1G回す」を押して、何が起きるか見てみよう。</div>
+    <p class="demo-instruction" id="simNext">次にすること：1G回す</p>
+    <button class="demo-play" id="simSpin">▶ 1G回す</button>
+    <div id="simDecision" class="decision-row hide"></div>
+    <p class="demo-result" id="simResult">BET → レバー → リール停止を自動で体験します。</p>
+    <details class="demo-manual" id="simManual"><summary>操作を自分でやってみる（BET・レバー・STOP）</summary><p class="muted" style="font-size:12px">この練習では自分でボタンを押して1Gを完了。成立役はレバー時点で決まり、停止順で新たな当たりを作れません。</p><div class="manual-grid"><button class="btn span3" id="simBet">① MAX BET</button><button class="btn span3" id="simLever">② レバーON</button><button class="btn" id="simStop0">左 STOP</button><button class="btn" id="simStop1">中 STOP</button><button class="btn" id="simStop2">右 STOP</button></div></details>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px"><button class="btn" id="simReset">最初から</button><a href="#" id="simToBook">基本用語を読む</a></div>
+  </div>
+  <aside class="card">
+   <div class="stepmeta">リアルタイムで更新</div><h2>今どこ？ 次は何？</h2>
+   <ol class="demo-flow" id="simFlow"></ol>
+   <p class="demo-purpose" id="simWhy">今の目的：CZに入ること。</p>
+   <p class="demo-disclaimer">通常時2G→CZ2G→AT3G→引き戻し2Gという短い流れは、仕組みを学ぶための<strong>架空の短縮設定</strong>です。SAO2の実機仕様・確率・出玉性能を示しません。</p>
+  </aside>
+ </div>
+</section>
+<nav aria-label="詳しい教材"><a href="advanced.html#learn">詳しい28章</a> ／ <a href="advanced.html#machine">機種別情報</a> ／ <a href="advanced.html#learn/a-rate">応用編</a> ／ <a href="advanced.html#quiz">理解度確認</a></nav><section id="book" class="view"><button class="back" data-to="home">← 最初に戻る</button><div class="card"><span class="stepmeta">共通基礎 → 実機の打ち方 → 応用</span><h1>スロットの基礎教科書</h1><p class="lead">まず6つの基本テーマ。分からなくなったら、ここに戻れる。</p><div class="learn-grid"><div class="lesson"><details><summary>① 全体の流れ</summary><p>通常時は当たりを目指す区間。CZは当たりへの挑戦。ATは主に出玉を増やす区間。終了後にATへ復帰することが引き戻し。</p></details></div><div class="lesson"><details><summary>② 1ゲームの操作</summary><p>BET→レバーON（内部抽選）→3つの停止ボタン→入賞と払い出し。停止ボタンは当たりを作る魔法ではない。</p></details></div><div class="lesson"><details><summary>③ 小役を狙う意味</summary><p>ベル・スイカ・チェリー等の役を取りこぼさないことや停止形を理解するため。成立役の確率は目押しでは変わらない。損失は機種ごとに異なる。</p></details></div><div class="lesson"><details><summary>④ CZとAT</summary><p>CZは成功・失敗があり、失敗すれば通常時へ戻る例がある。ATはナビに従うなどして出玉を増やす区間。上乗せや上位ATは機種ごとに異なる。</p></details></div><div class="lesson"><details><summary>⑤ 終了後と引き戻し</summary><p>ATが終わったあとでも、機種固有の条件でATへ戻る可能性がある。必ず復帰するわけではない。</p></details></div><div class="lesson"><details><summary>⑥ 応用へ（後で）</summary><p>設定・天井・ゾーン・期待値などは、全体の流れを理解してから学ぶ。細かな数字は最初から暗記しなくてよい。</p></details></div></div><div class="actions"><button class="btn next" data-to="journey">全体像を体験する →</button></div></div></section>
+<section id="reels" class="view"><button class="back" data-to="home">← 最初に戻る</button><div class="card"><span class="stepmeta">SAO2 実機操作の学習エリア</span><h1>SAO2の打ち方</h1><p class="lead">通常時に何を狙い、停止形をどう読むかを確認しよう。</p><div class="warnings">この教材では実機の図柄配列を使った操作練習は未実装です。まずは手順の基本から学びます。</div><h3>実機で覚える順番</h3><ol class="bullets"><li>ナビがなければ左から停止する</li><li>左リール枠上〜上段付近の黒BARを目印にする</li><li>左上段にスイカが停止したら中リールにもスイカを狙う（BARを目安）。右は基本フリー</li><li>チェリー・スイカ・チャンス目の停止形を見て理解する</li></ol><h3>実機の配列が掲載されている資料</h3><p class="external"><a target="_blank" rel="noopener" href="https://1geki.jp/slot/l_sao2/2/">一撃：SAO2リール配列・打ち方</a><a target="_blank" rel="noopener" href="https://hisshobon.com/machineinfo/102409/">必勝本：配列・有効ライン</a></p><p class="muted">写真を許諾なしでコピーせず、確認済みの配列データに基づく教材用の独自描画へ進みます。</p></div></section>
+</div><script>
+const stages=[
+{label:'通常時',badge:'① 次のチャンスを目指す',title:'まずは通常時',main:'普段はゲームを進めながら、チャンスゾーン（CZ）やATに入るきっかけを待つ。',rule:'今の目的：CZなどの当たりにつながるチャンスを得る。',more:'小役、規定ゲーム数、直撃などのルートがある。ルートは機種ごとに違う。'},
+{label:'CZ',badge:'② 当たりへの挑戦',title:'CZに入った！',main:'CZは「成功するとATへ進めるかもしれない区間」。入っただけではAT確定ではない。',rule:'成功 → ATへ　／　失敗 → 通常時へ',more:'CZはチャンスゾーンの略。実機ではゲーム数や成功条件が機種によって違う。'},
+{label:'AT',badge:'③ 出玉を増やす',title:'ATに入った！',main:'ATはナビや上乗せなどを利用して、主にメダルを増やす区間。これが目指していた当たりの中心。',rule:'残りの枚数やG数が尽きると終了へ向かう。',more:'SAO2の通常ATは差枚数管理だが、この全体像デモでは正確な抽選や数値を再現しない。'},
+{label:'終了',badge:'④ 当たりが終わった',title:'ATが終了',main:'ATが終わった。ただし「終わった＝もうチャンスがない」とは限らない。',rule:'機種によっては終了後の引き戻し判定がある。',more:'終了画面、前兆、終了後の専用区間は機種によって異なる。'},
+{label:'引き戻し',badge:'⑤ 終了後の復帰判定',title:'引き戻しとは？',main:'一度ATが終わった後、もう一度ATへ戻るチャンス。AT中の継続とは区別する。',rule:'成功 → ATへ復帰　／　失敗 → 通常時へ',more:'SAO2には終了後50Gの引き戻し区間がある。ここでは正確な内部抽選を再現しない。'}
+];let current=0;const $=id=>document.getElementById(id);
+function go(id){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id));if(id==='journey')draw();if(id==='sim')drawSim();window.scrollTo(0,0)}document.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>go(b.dataset.to));function draw(){const s=stages[current];$('count').textContent=`STEP ${current+1} / ${stages.length}`;$('kind').textContent=s.badge;$('stage-title').textContent=s.title;$('stage-main').textContent=s.main;$('stage-rule').textContent=s.rule;$('stage-more').textContent=s.more;$('prev').disabled=current===0;$('next').textContent=current===4?'引き戻し失敗 → 通常時 ↺':current===1?'CZ成功 → ATへ':'次へ →';$('track').replaceChildren();stages.forEach((p,i)=>{const b=document.createElement('button');b.textContent=p.label;b.className=i===current?'current':i<current?'visited':'';b.title=`${p.label}の説明へ`;b.onclick=()=>{current=i;draw()};$('track').appendChild(b)});const br=$('branch');br.classList.toggle('hide',current!==1&&current!==4);br.replaceChildren();if(current===1||current===4){const tip=document.createElement('div');tip.textContent=current===1?'CZに失敗したらどうなる？':'引き戻しが成功／失敗したら？';br.append(tip);const fail=document.createElement('button');fail.className='btn';fail.textContent=current===1?'CZ失敗 → 通常時':'引き戻し失敗 → 通常時';fail.onclick=()=>{current=0;draw()};br.append(fail);if(current===4){const success=document.createElement('button');success.className='btn';success.textContent='成功 → AT復帰';success.onclick=()=>{current=2;draw()};br.append(success)}}}
+$('next').onclick=()=>{current=(current+1)%stages.length;draw()};$('prev').onclick=()=>{current=Math.max(0,current-1);draw()};draw();
+
+// 1G操作とCZ→AT→引き戻しの流れを教える架空モデル。実機の解析値・配列は使用しない。
+const demoNames={normal:'通常時',cz:'CZ',at:'AT',end:'AT終了',return:'引き戻し'};
+const demoGoal={normal:'次のCZを目指す',cz:'CZに成功してATへ進む',at:'ナビで出玉を増やす（教材用）',end:'終了後に復帰チャンスがあるか確認',return:'ATに復帰できるか確認'};
+const demoWhy={normal:'今の目的：CZなどのチャンスを得る。',cz:'CZは当たりへの挑戦。成功するまでAT確定ではない。',at:'ATは出玉を増やす区間。残り枚数・G数などの管理は機種ごとに違う。',end:'AT終了。ここで終わりとは限らず、引き戻しがある機種もある。',return:'引き戻しはAT終了後にもう一度復帰すること。成功も失敗もある。'};
+let simVersion=0; // 非同期の1G操作をリセット・再実行時にキャンセルする識別子
+const simModel={phase:'normal',g:0,total:0,coins:100,cycle:'ready',role:null,displayRole:null,stops:[],freeBet:false,stake:0,pending:null,last:'まずは「1G回す」から。',lastResult:'BET → レバー → リール停止を自動で体験します。',busy:false};
+const phaseLimit={normal:2,cz:2,at:3,return:2};
+const sampleRoles={normal:['ハズレ','チェリー'],cz:['ベル','リプレイ'],at:['ベル','ベル','スイカ'],return:['ハズレ','チェリー']};
+const symbols=['7','BAR','🔔','🍒','🍉','↻'];
+function centerForRole(role, reel){
+ if(role==='ベル')return '🔔';
+ if(role==='リプレイ')return '↻';
+ if(role==='スイカ')return '🍉';
+ if(role==='チェリー')return reel===0?'🍒':symbols[(simModel.total+reel)%2];
+ return symbols[(simModel.total*2+reel)%symbols.length];
+}
+function showReels(rolling=false){
+ for(let i=0;i<3;i++){
+  const node=$('mockReel'+i);
+  node.classList.toggle('anim',rolling&&!simModel.stops.includes(i));
+  const c=(simModel.role||simModel.displayRole)?centerForRole(simModel.role||simModel.displayRole,i):symbols[(simModel.total+i*2+3)%symbols.length];
+  const top=symbols[(simModel.total+i+1)%symbols.length];
+  const bottom=symbols[(simModel.total+i+4)%symbols.length];
+  const chars=(rolling&&!simModel.stops.includes(i))?['◌','回転','◌']:[top,c,bottom];
+  Array.from(node.children).forEach((n,j)=>n.textContent=chars[j]);
+ }
+}
+function drawSim(){
+ const s=simModel;
+ $('simTotal').textContent=s.total+'G';$('simCoins').textContent=s.coins+'枚';
+ $('simPhase').textContent=demoNames[s.phase];$('simObjective').textContent=demoGoal[s.phase];
+ $('simSticky').textContent='現在地：'+demoNames[s.phase]+' ／ '+(phaseLimit[s.phase]?s.g+'/'+phaseLimit[s.phase]+'G':'終了を確認');
+ $('simExplain').textContent=s.last+(s.role?' 成立役：'+s.role+'（レバーで決定済み）':'');$('simResult').textContent=s.lastResult;$('simWhy').textContent=demoWhy[s.phase];
+ $('simFlow').replaceChildren();
+ ['normal','cz','at','end','return'].forEach((p,i)=>{
+  const li=document.createElement('li');const sequence=['normal','cz','at','end','return'];const pos=sequence.indexOf(s.phase);
+  li.className=p===s.phase?'current':'';
+  const mark=document.createElement('span');mark.textContent=p===s.phase?'●':String(i+1);li.append(mark,document.createTextNode(demoNames[p]));
+  if(p===s.phase){const here=document.createElement('small');here.textContent=' ← 今ここ';li.append(here)}
+  $('simFlow').append(li);
+ });
+ $('simDecision').replaceChildren(); $('simDecision').classList.toggle('hide',!s.pending);
+ if(s.pending){
+  const variants=s.pending==='cz'?[['CZ成功 → AT','at','成功したのでATへ進みます。'],['CZ失敗 → 通常時','normal','CZは失敗。通常時へ戻りました。']]:[['成功 → ATに復帰','at','引き戻し成功！一度終わったATへ戻りました。'],['失敗 → 通常時','normal','引き戻し失敗。通常時へ戻りました。']];
+  variants.forEach(([label,phase,reason])=>{const b=document.createElement('button');b.className='btn';b.textContent=label;b.onclick=()=>{s.pending=null;enterPhase(phase,reason);drawSim()};$('simDecision').append(b)});
+ }
+ $('simSpin').textContent=s.phase==='end'?'▶ 引き戻しを確認する':s.pending?'結果を選んで進む':s.cycle==='ready'?'▶ 1G回す':'▶ この1Gを最後まで進める';
+ $('simSpin').disabled=!!s.pending||s.busy||(s.cycle==='ready'&&s.phase!=='end'&&!s.freeBet&&s.coins<3);
+ $('simNext').textContent=s.pending?'結果を選ぼう':s.phase==='end'?'次にすること：終了後の引き戻しへ':s.cycle==='ready'&&s.coins<3&&!s.freeBet?'架空コイン不足。「最初から」で無料補充できます。':s.cycle==='ready'?'次にすること：1G回す':'手動で続けるか「この1Gを最後まで進める」を押す';
+ $('simBet').disabled=!!s.pending||s.phase==='end'||s.busy||s.cycle!=='ready';
+ $('simLever').disabled=s.cycle!=='bet'||s.busy;
+ [0,1,2].forEach(i=>{$('simStop'+i).disabled=s.cycle!=='spin'||s.stops.includes(i)||s.busy});
+ showReels(s.cycle==='spin');
+}
+function enterPhase(phase,why){const s=simModel;s.phase=phase;s.g=0;s.cycle='ready';s.role=null;s.displayRole=null;s.stops=[];s.pending=null;s.stake=0;s.last=why;s.lastResult='次のゲームに進みましょう。'}
+function betSim(){const s=simModel;if(s.cycle!=='ready'||s.pending||s.phase==='end')return false;
+ const cost=s.freeBet?0:3;
+ if(s.coins<cost){s.last='架空コインが足りません。「最初から」で無料補充できます。';return false}
+ s.coins-=cost;s.stake=cost;s.freeBet=false;s.displayRole=null;s.cycle='bet';s.last=cost?'BET：架空コイン3枚をゲームに使いました。':'前のリプレイ成立により、今回は追加投入なし。';return true;
+}
+function leverSim(){const s=simModel;if(s.cycle!=='bet')return false;
+ s.role=sampleRoles[s.phase][s.g%sampleRoles[s.phase].length];s.cycle='spin';s.stops=[];
+ s.last='レバーON：この時点で内部の成立役が決定しました。STOPで新しい当たりを作るわけではありません。';return true;
+}
+function stopSim(i){const s=simModel;if(s.cycle!=='spin'||s.stops.includes(i))return false;
+ s.stops.push(i);
+ if(s.stops.length===3)finishSim();else s.last='リール'+s.stops.length+'本停止。残りを止めてください。';
+ return true;
+}
+function finishSim(){const s=simModel;const role=s.role;let paid=role==='ベル'?8:role==='チェリー'?2:role==='スイカ'?3:0;
+ s.coins+=paid;s.freeBet=role==='リプレイ';s.total++;s.g++;s.cycle='ready';s.displayRole=s.role;s.role=null;s.stops=[];
+ s.lastResult='成立役：'+role+' ／ 投入 '+s.stake+'枚 ／ 払出 '+paid+'枚 ／ 今回差引 '+(paid-s.stake)+'枚（すべて教材用）';
+ s.last=role==='リプレイ'?'リプレイ成立。次のゲームは追加BETが不要になります。':role==='ハズレ'?'今回は払い出しなし。ゲームを続けてみよう。':'停止しました。払い出しを確認し、現在地の変化を見よう。';
+ s.stake=0;
+ if(s.g>=phaseLimit[s.phase]){
+  if(s.phase==='normal')enterPhase('cz','通常時のチャンスからCZへ。これは2Gで進む教材用の短縮ルートです。');
+  else if(s.phase==='cz'){s.pending='cz';s.last='CZの結果を選ぼう。これは抽選結果の確率を示すものではありません。'}
+  else if(s.phase==='at')enterPhase('end','ATの教材ゲージを使い切りました。引き戻しがあるか確認します。');
+  else if(s.phase==='return'){s.pending='return';s.last='引き戻しの結果を選ぼう。復帰できる場合と、通常時へ戻る場合があります。'}
+ }
+}
+$('simSpin').onclick=async()=>{
+ const s=simModel;if(s.busy||s.pending)return;
+ if(s.phase==='end'){enterPhase('return','AT終了後、引き戻し区間へ。教材では2Gに短縮しています。');drawSim();return}
+ if(s.cycle==='ready'&&!betSim()){drawSim();return}
+ if(s.cycle==='bet'&&!leverSim()){drawSim();return}
+ if(s.cycle!=='spin'){drawSim();return}
+ s.busy=true;const version=++simVersion;drawSim();
+ await new Promise(resolve=>setTimeout(resolve,280));
+ if(version!==simVersion)return; // 「最初から」で以前の非同期操作を無効化
+ [0,1,2].forEach(i=>{if(!s.stops.includes(i))stopSim(i)});
+ s.busy=false;drawSim();
+};
+$('simManual').addEventListener('toggle',()=>drawSim());
+$('simBet').onclick=()=>{betSim();drawSim()};$('simLever').onclick=()=>{leverSim();drawSim()};
+[0,1,2].forEach(i=>{$('simStop'+i).onclick=()=>{stopSim(i);drawSim()}});
+$('simReset').onclick=()=>{simVersion++;Object.assign(simModel,{phase:'normal',g:0,total:0,coins:100,cycle:'ready',role:null,displayRole:null,stops:[],freeBet:false,stake:0,pending:null,last:'最初から。「1G回す」を押してみよう。',lastResult:'BET → レバー → リール停止を自動で体験します。',busy:false});drawSim()};
+$('simToBook').onclick=e=>{e.preventDefault();go('book')};
+
+drawSim();
+</script></body></html>
