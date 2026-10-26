@@ -115,18 +115,21 @@ for (const id of ["simMachine", "machineSelect"]) {
     $(id).append(option);
   }
   $(id).onchange = (e) => {
-    sim.reset(e.target.value);
-    $("forceRole").value = "";
-    $("outcome").value = "random";
-    $("aim").checked = true;
-    render();
+    if(id === "machineSelect") { renderMachine(machines[e.target.value]); return; }
+    if(!changeSimulation(e.target.value)) return;
     renderMachine();
   };
 }
+function changeSimulation(id){
+ if(id===sim.machine.id)return true;
+ if((sim.s.total>0||sim.s.cycle!=="ready")&&!window.confirm("機種を変更すると現在の練習を初期化します。変更しますか？")){$("simMachine").value=sim.machine.id;return false;}
+ sim.reset(id);$("forceRole").value="";$("outcome").value="random";$("aim").checked=true;render();return true;
+}
+
 function render() {
   const s = sim.s,
     m = sim.machine;
-  for (const id of ["simMachine", "machineSelect"]) $(id).value = m.id;
+  $("simMachine").value = m.id;
   $("simMachineName").textContent = m.name;
   $("phaseBadge").textContent = sim.node.name;
   $("phaseName").textContent = sim.node.name;
@@ -291,8 +294,9 @@ function sourceCards(target, list) {
     target.append(card);
   });
 }
-function renderMachine() {
-  const m = sim.machine,
+function renderMachine(m = sim.machine) {
+  $("machineSelect").value=m.id;
+  const
     target = $("machineContent");
   target.replaceChildren(
     el("h3", m.name),
@@ -366,7 +370,7 @@ function renderMachine() {
       : "通常8G・CZ5G・AT8G・ラストアタック5G・上位CZ3G・上位AT8G・終了後50G。CZ成功55%、上位CZ50%、ラストアタック30%、終了後毎G1.2%（50G目チェリー／スイカのみ90%）。いずれも未判明の実機確率の代用ではなく教材仮値です。AT中チェリーをSC勝利として数え、3勝で上位CZ権利。＋2G上乗せは最大2回。復帰時はSC勝利数を保持。");
   target.append(
     values,
-    link("選択した機種を操作する →", "#sim"),
+    Object.assign(link("選択した機種を操作する →", "#sim"), {onclick:(e)=>{if(!changeSimulation(m.id))e.preventDefault();}}),
     el("h3", "教材と関連資料"),
   );
   target.append(

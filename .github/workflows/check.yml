@@ -36,6 +36,7 @@ jobs:
             sleep 1
           done
           BASE_URL=http://127.0.0.1:8000/slot-academy/ npm run test:browser
+          BASE_URL=http://127.0.0.1:8000/slot-academy/ node tests/journey-browser.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

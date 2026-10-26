@@ -30,14 +30,14 @@ async function main(){
  assert.equal(s.phase,'normal');
  assert.equal(e('simSpin').disabled,false);
  await spin();assert.equal(s.g,1);assert.equal(s.coins,97);assert.equal(s.total,1);
- await spin();assert.equal(s.phase,'cz');assert.equal(s.total,2);
+ await spin();assert.equal(s.phase,'cz');assert.equal(s.total,2);assert.match(e('simResult').textContent,/チェリー/);assert.match(e('simResult').textContent,/払出 2枚/);assert.equal(s.coins,96);
  assert.match(e('simSpin').textContent,/1G/);
  await spin();await spin();assert.equal(s.pending,'cz');assert.equal(e('simSpin').disabled,true);
  e('simDecision').children[1].onclick();assert.equal(s.phase,'normal');
  await spin();await spin();assert.equal(s.phase,'cz');
  await spin();await spin();assert.equal(s.pending,'cz');
  e('simDecision').children[0].onclick();assert.equal(s.phase,'at');
- await spin();await spin();await spin();assert.equal(s.phase,'end');
+ await spin();await spin();await spin();assert.equal(s.phase,'end');assert.match(e('simResult').textContent,/スイカ/);assert.match(e('simResult').textContent,/払出 3枚/);
  await spin();assert.equal(s.phase,'return');
  await spin();await spin();assert.equal(s.pending,'return');
  e('simDecision').children[0].onclick();assert.equal(s.phase,'at');
