@@ -116,11 +116,11 @@ function drawSim(){
  [0,1,2].forEach(i=>{$('simStop'+i).disabled=s.cycle!=='spin'||s.stops.includes(i)||s.busy});
  showReels(s.cycle==='spin');
 }
-function enterPhase(phase,why){const s=simModel;s.phase=phase;s.g=0;s.cycle='ready';s.role=null;s.displayRole=null;s.stops=[];s.pending=null;s.stake=0;s.last=why;s.lastResult='次のゲームに進みましょう。'}
+function enterPhase(phase,why){const s=simModel;s.phase=phase;s.g=0;s.cycle='ready';s.role=null;s.displayRole=null;s.stops=[];s.pending=null;s.stake=0;s.last=why}
 function betSim(){const s=simModel;if(s.cycle!=='ready'||s.pending||s.phase==='end')return false;
  const cost=s.freeBet?0:3;
  if(s.coins<cost){s.last='架空コインが足りません。「最初から」で無料補充できます。';return false}
- s.coins-=cost;s.stake=cost;s.freeBet=false;s.displayRole=null;s.cycle='bet';s.last=cost?'BET：架空コイン3枚をゲームに使いました。':'前のリプレイ成立により、今回は追加投入なし。';return true;
+ s.coins-=cost;s.stake=cost;s.freeBet=false;s.displayRole=null;s.lastResult='このゲームは進行中です。3本停止後に結果を表示します。';s.cycle='bet';s.last=cost?'BET：架空コイン3枚をゲームに使いました。':'前のリプレイ成立により、今回は追加投入なし。';return true;
 }
 function leverSim(){const s=simModel;if(s.cycle!=='bet')return false;
  s.role=sampleRoles[s.phase][s.g%sampleRoles[s.phase].length];s.cycle='spin';s.stops=[];
