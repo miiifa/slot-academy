@@ -17,6 +17,12 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx playwright install --with-deps chromium
+      - name: Prototype browser regression
+        run: |
+          python3 -m http.server 8004 --bind 127.0.0.1 > /tmp/prototype-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid"' EXIT
+          BASE_URL=http://127.0.0.1:8004/ node tests/prototype-browser.cjs
       - run: node scripts/build.mjs
       - name: Serve as a GitHub Pages project site and check the browser
         run: |
