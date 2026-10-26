@@ -52,6 +52,22 @@ async function main(){
  e('simReset').onclick();assert.equal(s.total,0);assert.equal(s.coins,100);
  while(queue.length)queue.shift()();await oldSpin;
  assert.equal(s.total,0);assert.equal(s.coins,100);assert.equal(s.busy,false);
+
+ // リプレイの権利は区間ではなく次のBETに属する。
+ for(const target of ['normal','at','return']){
+  e('simReset').onclick();s.freeBet=true;s.coins=0;
+  sandbox.__probe.enterPhase(target,'境界');
+  assert.equal(s.freeBet,true);assert.equal(sandbox.__probe.betSim(),true);
+  assert.equal(s.coins,0);assert.equal(s.freeBet,false);
+ }
+ e('simReset').onclick();sandbox.__probe.enterPhase('cz','開始');
+ await spin();await spin();assert.equal(s.freeBet,true);
+ e('simDecision').children[0].onclick();const replayCoins=s.coins;
+ e('simBet').onclick();assert.equal(s.coins,replayCoins);assert.equal(s.stake,0);
+ // 連続リプレイも各ゲームのBETで一度だけ消費する。
+ for(let i=0;i<2;i++){s.cycle='bet';s.role='リプレイ';s.cycle='spin';s.stops=[];[0,1,2].forEach(sandbox.__probe.stopSim);assert.equal(s.freeBet,true);const coins=s.coins;sandbox.__probe.betSim();assert.equal(s.coins,coins);}
+ e('simReset').onclick();assert.equal(s.freeBet,false);
+ e('simBet').onclick();e('simReset').onclick();assert.equal(s.coins,100);assert.equal(s.freeBet,false);
  console.log('PASS: 1G/CZ/AT/引き戻し/手動→自動/残高不足/リセット競合');
 }
 main().catch(err=>{console.error(err);process.exitCode=1});

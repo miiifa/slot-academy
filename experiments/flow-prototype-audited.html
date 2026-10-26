@@ -114,7 +114,7 @@ function drawSim(){
  [0,1,2].forEach(i=>{$('simStop'+i).disabled=s.cycle!=='spin'||s.stops.includes(i)||s.busy});
  showReels(s.cycle==='spin');
 }
-function enterPhase(phase,why){const s=simModel;s.phase=phase;s.g=0;s.cycle='ready';s.role=null;s.displayRole=null;s.stops=[];s.pending=null;s.stake=0;s.freeBet=false;s.last=why;s.lastResult='次のゲームに進みましょう。'}
+function enterPhase(phase,why){const s=simModel;s.phase=phase;s.g=0;s.cycle='ready';s.role=null;s.displayRole=null;s.stops=[];s.pending=null;s.stake=0;s.last=why;s.lastResult='次のゲームに進みましょう。'}
 function betSim(){const s=simModel;if(s.cycle!=='ready'||s.pending||s.phase==='end')return false;
  const cost=s.freeBet?0:3;
  if(s.coins<cost){s.last='架空コインが足りません。「最初から」で無料補充できます。';return false}
